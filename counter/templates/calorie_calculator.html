@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'style2.css' %}">
+    <title>Calorie Calculator</title>
+</head>
+<body>
+        <div class="top-bar">
+            <div class="user-info">
+                {% if user.is_authenticated %}
+                    <span class="greeting">Hi, {{ user.first_name }}</span>
+                    {% if user.profile.profile_picture %}
+                        <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="profile-picture">
+                    {% else %}
+                        <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Picture" class="profile-picture">
+                    {% endif %}
+                {% else %}
+                    <span class="greeting">Welcome, Guest</span>
+                {% endif %}
+            </div>
+        </div>
+    
+    <aside>
+        <div class="toggle">
+            <div class="logo">
+                <picture>
+                    <source srcset="{% static 'images/logo-small.png' %}" media="(max-width: 600px)">
+                    <source srcset="{% static 'images/logo-medium.pn g' %}" media="(max-width: 1200px)">
+                 </picture>
+                <h2>NutriMate<span class="danger"></span></h2>
+            </div>
+            <div class="close" id="close-btn">
+                <span class="material-symbols-outlined">close</span>
+            </div>
+        </div>
+        
+        <!-- Sidebar Content Section -->
+        <div class="sidebar">
+            <a href="{% url 'home' %}">
+                <span class="material-symbols-outlined">nutrition</span>
+                <h3>Check Calories Fast</h3>
+            </a>
+            <a href="{% url 'calorie_calculator' %}">
+                <span class="material-symbols-outlined">calculate</span>
+                <h3>Calorie Calculator</h3>
+            </a>
+            <a href="{% url 'diary' %}">
+                <span class="material-symbols-outlined">book</span>
+                <h3>Track Your Weight Loss</h3>
+            </a>
+            <a href="{% url 'settings' %}">
+                <span class="material-symbols-outlined">settings</span>
+                <h3>Settings</h3>
+            </a>
+            <div class="logout">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">
+                        <span class="material-symbols-outlined">logout</span>
+                        <h3>Logout</h3>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <div class="container">
+        <div class="box">
+            <h1>Calorie Calculator</h1>
+            <form method="post">
+                {% csrf_token %}
+                <div class="input">
+                    <label for="age">Age</label>
+                    {{ form.age }}
+                </div>
+                <div class="gender">
+                    <label class="container">
+                        <input type="radio" name="gender" value="male" id="m">
+                        <p class="text">Male</p>
+                        <span class="checkmark"></span>
+                    </label>
+                    <label class="container">
+                        <input type="radio" name="gender" value="female" id="f">
+                        <p class="text">Female</p>
+                        <span class="checkmark"></span>
+                    </label>
+                </div>
+
+                <div class="containerHW">
+                    <div class="inputH">
+                        <label for="height">Height (cm)</label>
+                        {{ form.height }}
+                    </div>
+                    <div class="inputW">
+                        <label for="weight">Weight (kg)</label>
+                        {{ form.weight }}
+                    </div>
+                </div>
+
+                <div class="input activity-level">
+                    <label for="activity_level">Activity Level</label>
+                    {{ form.activity_level }}
+                </div>
+                
+                <button class="calculate" type="submit">Calculate Calories</button>
+            </form>
+        </div>
+    </div>
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>

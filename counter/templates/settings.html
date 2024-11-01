@@ -1,0 +1,116 @@
+{% load static %}
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'style5.css' %}">
+    <title>Settings</title>
+</head>
+<body>
+    <button id="theme-toggle" class="theme-toggle">Switch to Night Mode</button>
+        <div class="top-bar">
+            <div class="user-info">
+                {% if user.is_authenticated %}
+                    <span class="greeting">Hi, {{ user.first_name }}</span>
+                    {% if user.profile.profile_picture %}
+                        <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="profile-picture">
+                    {% else %}
+                        <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Picture" class="profile-picture">
+                    {% endif %}
+                {% else %}
+                    <span class="greeting">Welcome, Guest</span>
+                {% endif %}
+            </div>
+        </div>
+    <!-- Sidebar Section -->
+    <aside>
+        <div class="toggle">
+            <div class="logo">
+                <picture>
+                    <source srcset="{% static 'images/logo-small.png' %}" media="(max-width: 600px)">
+                    <source srcset="{% static 'images/logo-medium.png' %}" media="(max-width: 1200px)">
+                </picture>
+                <h2>NutriMate<span class="danger"></span></h2>
+            </div>
+            <div class="close" id="close-btn">
+                <span class="material-symbols-outlined">close</span>
+            </div>
+        </div>
+
+        <!-- Sidebar Content Section -->
+        <div class="sidebar">
+            <a href="{% url 'home' %}">
+                <span class="material-symbols-outlined">nutrition</span>
+                <h3>Check Calories Fast</h3>
+            </a>
+            <a href="{% url 'calorie_calculator' %}">
+                <span class="material-symbols-outlined">calculate</span>
+                <h3>Calorie Calculator</h3>
+            </a>
+            <a href="{% url 'diary' %}">
+                <span class="material-symbols-outlined">book</span>
+                <h3>Track Your Weight Loss</h3>
+            </a>
+            <a href="{% url 'settings' %}" class="active">
+                <span class="material-symbols-outlined">settings</span>
+                <h3>Settings</h3>
+            </a>
+            <div class="logout">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">
+                        <span class="material-symbols-outlined">logout</span>
+                        <h3>Logout</h3>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Section -->
+    <main>
+        <div class="settings-container">
+            <h2>Profile Settings</h2>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="profile_picture">Profile Picture</label>
+                    <input type="file" id="profile_picture" name="profile_picture" class="file-input">
+                </div>
+
+                <!-- Display the current profile picture if available -->
+                {% if user.profile.profile_picture %}
+                    <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" style="max-width: 200px; margin-top: 20px;">
+                {% endif %}
+
+                <button type="submit" class="save-button">Save Changes</button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Optional JavaScript for Theme Toggle -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+    </script>
+</body>
+</html>

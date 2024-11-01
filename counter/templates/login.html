@@ -1,0 +1,30 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'style6.css' %}">
+    <title>Login - Foodie</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Login</h1>
+        <form method="post" action="{% url 'login' %}">
+
+        <form method="POST">
+            {% csrf_token %}
+            {% if form.errors %}
+                <div class="error-message">Invalid credentials, please try again.</div>
+            {% endif %}
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <footer>
+            <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
+        </footer>
+    </div>
+</body>
+</html>

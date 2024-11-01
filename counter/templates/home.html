@@ -1,0 +1,358 @@
+{% load static %}
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>Responsive Dashboard Design</title>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="user-info">
+            {% if user.is_authenticated %}
+                <span class="greeting">Hi, {{ user.first_name }}</span>
+                {% if user.profile.profile_picture %}
+                    <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="profile-picture">
+                {% else %}
+                    <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Picture" class="profile-picture">
+                {% endif %}
+            {% else %}
+                <span class="greeting">Welcome, Guest</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sidebar Section -->
+    <aside>
+        <div class="toggle">
+            <div class="logo">
+                <picture>
+                    <source srcset="{% static 'images/logo-small.png' %}" media="(max-width: 600px)">
+                    <source srcset="{% static 'images/logo-medium.png' %}" media="(max-width: 1200px)">
+                </picture>
+                <h2>NutriMate<span class="danger"></span></h2>
+            </div>
+            <div class="close" id="close-btn">
+                <span class="material-symbols-outlined">close</span>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <a href="{% url 'home' %}">
+                <span class="material-symbols-outlined">nutrition</span>
+                <h3>Check Calories Fast</h3>
+            </a>
+            <a href="{% url 'calorie_calculator' %}">
+                <span class="material-symbols-outlined">calculate</span>
+                <h3>Calorie Calculator</h3>
+            </a>
+            <a href="{% url 'diary' %}">
+                <span class="material-symbols-outlined">book</span>
+                <h3>Track Your Weight Loss</h3>
+            </a>
+            <a href="{% url 'settings' %}">
+                <span class="material-symbols-outlined">settings</span>
+                <h3>Settings</h3>
+            </a>
+            <div class="logout">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">
+                        <span class="material-symbols-outlined">logout</span>
+                        <h3>Logout</h3>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Calorie Calculator Section -->
+        <section class="calorie-calculator">
+            <h1>Calorie Calculator</h1>
+            {% if food_name %}
+                <div class="calorie-result">
+                    <h3>{{ food_name|capfirst }} has  {{ calories|floatformat:0 }} calories</h3>
+                    <ul>
+                        <li><strong>Calories:</strong> {{ calories|floatformat:2 }}</li>
+                        <li><strong>Protein:</strong> {{ protein|floatformat:2 }}g</li>
+                        <li><strong>Carbohydrates:</strong> {{ carbohydrates|floatformat:2 }}g</li>
+                        <li><strong>Fat:</strong> {{ fat|floatformat:2 }}g</li>
+                    </ul>
+                </div>
+            {% else %}
+                <p>No data available. Please search for a food item.</p>
+            {% endif %}
+        </section>
+
+        <!-- Search Bar Section -->
+        <div class="search-container">
+            <form method="post">
+                {% csrf_token %}
+                <div class="box">
+                    <input type="text" name="food_name_search" placeholder="Search for calories in your food" class="box_input" id="search-input">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-container">
+            {% if food_name %}
+                <div class="progress">
+                    <svg>
+                        <circle cx="38" cy="38" r="36"></circle>
+                    </svg>
+                    <div class="percent">
+                        <p>{{ calories|default_if_none:0|div:378|mul:60|floatformat:0 }}-min</p>
+                    </div>
+                    <div class="info">
+                        <h3>Burn {{ calories|floatformat:0 }} calories by</h3>
+                        <h1>Running</h1>
+                        <img src="{% static 'images/Run.png.png' %}" alt="Jogging">
+                    </div>
+                </div>
+                <div class="progress weightlifting">
+                    <svg>
+                        <circle cx="38" cy="38" r="36"></circle>
+                    </svg>
+                    <div class="percent">
+                        <p>{{ calories|default_if_none:0|div:483|mul:60|floatformat:0 }}-min</p>
+                    </div>
+                    <div class="info">
+                        <h3>Burn {{ calories|floatformat:0 }} calories by</h3>
+                        <h1>Weightlifting</h1>
+                        <img src="{% static 'images/weightlifter.png' %}" alt="Weightlifting">
+                    </div>
+                </div>
+                <div class="progress walking">
+                    <svg>
+                        <circle cx="38" cy="38" r="36"></circle>
+                    </svg>
+                    <div class="percent">
+                        <p>{{ calories|default_if_none:0|div:294|mul:60|floatformat:0 }}-min</p>
+                    </div>
+                    <div class="info">
+                        <h3>Burn {{ calories|floatformat:0 }} calories by</h3>
+                        <h1>Walking</h1>
+                        <img src="{% static 'images/walking.png' %}" alt="walking">
+                    </div>
+                </div>
+            {% else %}
+                <!-- Placeholder content when there's no data -->
+                <div class="progress">
+                    <svg>
+                        <circle cx="38" cy="38" r="36"></circle>
+                    </svg>
+                    <div class="percent">
+                        <p>-min</p>
+                    </div>
+                    <div class="info">
+                        <h3>Burn calories by</h3>
+                        <h1>Running</h1>
+                        <img src="{% static 'images/Run.png.png' %}" alt="Placeholder">
+                    </div>
+                </div>
+                <div class="progress weightlifting">
+                    <svg>
+                        <circle cx="38" cy="38" r="36"></circle>
+                    </svg>
+                    <div class="percent">
+                        <p>-min</p>
+                    </div>
+                    <div class="info">
+                        <h3>Burn calories by</h3>
+                        <h1>Weightlifting</h1>
+                        <img src="{% static 'images/weightlifter.png' %}" alt="Placeholder">
+                    </div>
+                </div>
+                <div class="progress walking">
+                    <svg>
+                        <circle cx="38" cy="38" r="36"></circle>
+                    </svg>
+                    <div class="percent">
+                        <p>-min</p>
+                    </div>
+                    <div class="info">
+                        <h3>Burn calories by</h3>
+                        <h1>Walking</h1>
+                        <img src="{% static 'images/walking.png' %}" alt="Placeholder">
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Dashboard Section -->
+        <div class="dashboard">
+            {% if food_name %}
+                <div class="card">
+                    <div class="line lime-line"></div>
+                    <h3>Protein</h3>
+                    <div class="value">{{ protein|floatformat:0 }}g</div>
+                    <div class="avg-date">{{ food_name }}</div>
+                </div>
+                <div class="card">
+                    <div class="line yellow-line"></div>
+                    <h3>Total Fat</h3>
+                    <div class="value">{{ fat|floatformat:0 }}g</div>
+                    <div class="avg-date">{{ food_name }}</div>
+                </div>
+                <div class="card">
+                    <div class="line green-line"></div>
+                    <h3>Carbohydrates</h3>
+                    <div class="value">{{ carbohydrates|floatformat:0 }}g</div>
+                    <div class="avg-date">{{ food_name }}</div>
+                </div>
+                <div class="card">
+                    <div class="line purple-line"></div>
+                    <h3>Saturated Fat</h3>
+                    <div class="value">{{ saturated_fat|floatformat:0 }}g</div>
+                    <div class="avg-date">{{ food_name }}</div>
+                </div>
+                <div class="card">
+                    <div class="line orange-line"></div>
+                    <h3>Cholesterol</h3>
+                    <div class="value">{{ cholesterol|floatformat:0 }}mg</div>
+                    <div class="avg-date">{{ food_name }}</div>
+                </div>
+                <div class="card">
+                    <div class="line cyan-line"></div>
+                    <h3>Fiber</h3>
+                    <div class="value">{{ fiber|floatformat:0 }}g</div>
+                    <div class="avg-date">{{ food_name }}</div>
+                </div>
+                <div class="card">
+                    <div class="line magenta-line"></div>
+                    <h3>Potassium</h3>
+                    <div class="value">{{ potassium|floatformat:0 }}mg</div>
+                    <div class="avg-date">{{ food_name }}</div>
+                </div>
+                <div class="card">
+                    <div class="line brown-line"></div>
+                    <h3>Sodium</h3>
+                    <div class="value">{{ sodium|floatformat:0 }}mg</div>
+                    <div class="avg-date">{{ food_name }}</div>
+                </div>
+                <div class="card">
+                    <div class="line red-line"></div>
+                    <h3>Sugar</h3>
+                    <div class="value">{{ sugar|floatformat:0 }}g</div>
+                    <div class="avg-date">{{ food_name }}</div>
+                </div>
+            {% else %}
+                <!-- Default card content when there's no data -->
+                <div class="card">
+                    <div class="line lime-line"></div>
+                    <h3>Protein</h3>
+                    <div class="value">7g</div>
+                    <div class="avg-date">4-day avg on Jun 4</div>
+                </div>
+                <div class="card">
+                    <div class="line yellow-line"></div>
+                    <h3>Total Fat</h3>
+                    <div class="value">10g</div>
+                    <div class="avg-date">4-day avg on Jun 4</div>
+                </div>
+                <div class="card">
+                    <div class="line green-line"></div>
+                    <h3>Carbohydrates</h3>
+                    <div class="value">24g</div>
+                    <div class="avg-date">4-day avg on Jun 4</div>
+                </div>
+                <div class="card">
+                    <div class="line purple-line"></div>
+                    <h3>Saturated Fat</h3>
+                    <div class="value">1.5g</div>
+                    <div class="avg-date">4-day avg on Jun 4</div>
+                </div>
+                <div class="card">
+                    <div class="line orange-line"></div>
+                    <h3>Cholesterol</h3>
+                    <div class="value">30mg</div>
+                    <div class="avg-date">4-day avg on Jun 4</div>
+                </div>
+                <div class="card">
+                    <div class="line cyan-line"></div>
+                    <h3>Fiber</h3>
+                    <div class="value">5g</div>
+                    <div class="avg-date">4-day avg on Jun 4</div>
+                </div>
+                <div class="card">
+                    <div class="line magenta-line"></div>
+                    <h3>Potassium</h3>
+                    <div class="value">200mg</div>
+                    <div class="avg-date">4-day avg on Jun 4</div>
+                </div>
+                <div class="card">
+                    <div class="line brown-line"></div>
+                    <h3>Sodium</h3>
+                    <div class="value">150mg</div>
+                    <div class="avg-date">4-day avg on Jun 4</div>
+                </div>
+                <div class="card">
+                    <div class="line red-line"></div>
+                    <h3>Sugar</h3>
+                    <div class="value">14g</div>
+                    <div class="avg-date">4-day avg on Jun 4</div>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const suggestionsBox = document.getElementById('suggestions');
+    
+        searchInput.addEventListener('input', function() {
+            const food_name_search = searchInput.value.trim();
+            if (food_name_search.length > 0) {
+                fetch(`/search-suggestions/?query=${food_name_search}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = '';
+                        data.forEach(suggestion => {
+                            const suggestionItem = document.createElement('div');
+                            suggestionItem.classList.add('suggestion-item');
+                            
+                            const img = document.createElement('img');
+                            img.src = suggestion.image;
+                            img.alt = suggestion.name;
+                            img.classList.add('suggestion-image');
+                            
+                            const text = document.createElement('span');
+                            text.textContent = suggestion.name;
+                            
+                            suggestionItem.appendChild(img);
+                            suggestionItem.appendChild(text);
+    
+                            suggestionItem.addEventListener('click', () => {
+                                searchInput.value = suggestion.name;
+                                suggestionsBox.innerHTML = '';
+                            });
+                            suggestionsBox.appendChild(suggestionItem);
+                        });
+                    });
+            } else {
+                suggestionsBox.innerHTML = '';
+            }
+        });
+    
+        document.addEventListener('click', function(event) {
+            if (!searchInput.contains(event.target) && !suggestionsBox.contains(event.target)) {
+                suggestionsBox.innerHTML = '';
+            }
+        });
+    </script>
+
+    <script src="{% static 'orders.js' %}"></script>
+    <script src="{% static 'index.js' %}"></script>
+</body>
+</html>

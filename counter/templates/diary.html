@@ -1,0 +1,433 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'style4.css' %}">
+    <title>Calorie Tracking Diary</title>
+</head>
+<body>
+<div class="top-bar">
+        <div class="user-info">
+            {% if user.is_authenticated %}
+                <span class="greeting">Hi, {{ user.first_name }}</span>
+                {% if user.profile.profile_picture %}
+                    <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="profile-picture">
+                {% else %}
+                    <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Picture" class="profile-picture">
+                {% endif %}
+            {% else %}
+                <span class="greeting">Welcome, Guest</span>
+            {% endif %}
+    </div>
+</div>
+   
+<header>
+    <h1>Calorie Tracking Diary</h1>
+</header>
+<!-- Calendar Section -->
+<div class="calendar-box">
+    <form method="get" action="{% url 'diary' %}">
+        <label for="date-picker">Select Date:</label>
+        <input type="date" id="date-picker" name="date" value="{{ selected_date }}">
+        <button type="submit">Go</button>
+    </form>
+</div>
+<!-- Sidebar Section -->
+<aside>
+    <div class="toggle">
+        <div class="logo">
+            <picture>
+                <source srcset="{% static 'images/logo-small.png' %}" media="(max-width: 600px)">
+                <source srcset="{% static 'images/logo-medium.png' %}" media="(max-width: 1200px)">
+            </picture>
+            <h2>NutriMate<span class="danger"></span></h2>
+        </div>
+        <div class="close" id="close-btn">
+            <span class="material-symbols-outlined">close</span>
+        </div>
+    </div>
+    <div class="sidebar">
+        <a href="{% url 'home' %}">
+            <span class="material-symbols-outlined">nutrition</span>
+            <h3>Check Calories Fast</h3>
+        </a>
+        <a href="{% url 'calorie_calculator' %}">
+            <span class="material-symbols-outlined">calculate</span>
+            <h3>Calorie Calculator</h3>
+        </a>
+        <a href="{% url 'diary' %}" class="active">
+            <span class="material-symbols-outlined">book</span>
+            <h3>Food Diary</h3>
+        </a>
+        <a href="{% url 'settings' %}">
+            <span class="material-symbols-outlined">settings</span>
+            <h3>Settings</h3>
+        </a>
+        <div class="logout">
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-button">
+                    <span class="material-symbols-outlined">logout</span>
+                    <h3>Logout</h3>
+                </button>
+            </form>
+        </div>
+</aside>
+<!-- Box Section -->
+ 
+<div class="box">
+    <h2>Today's Summary</h2>
+    <div class="circle-container">
+        <div class="circle" id="consumed-circle" style="--i:{{ consumed_percentage }};--clr:#43f94a">
+            <h1>{{ total_consumed_calories|floatformat:0 }} Kcal</h1>
+            <p>Consumed</p>
+        </div>
+        <div class="circle" style="--i:0;--clr:#2ccde9">
+            <h1>0 Kcal</h1>
+            <p>Burned</p>
+        </div>
+        <div class="circle" id="remaining-circle" style="--i:{{ remaining_percentage }};--clr:#fb297b">
+            <h1>{{ remaining_calories|floatformat:0 }} Kcal</h1>
+            <p>Remaining</p>
+        </div>
+    </div>
+    <form method="post" action="{% url 'diary_with_date' selected_date %}">
+        {% csrf_token %}
+        <input type="hidden" name="date" value="{{ selected_date }}">
+        <label for="daily_goal">Set Daily Calorie Goal:</label>
+        <input type="number" id="daily_goal" name="daily_goal" value="{{ calorie_goal }}">
+        <button type="submit">Save Goal</button>
+    </form>
+</div>
+<!-- Chart Section -->
+<div class="chart-box">
+    <canvas id="myChart"></canvas>
+</div>
+<main>
+    <section class="diary">
+        <h2>Food Diary</h2>
+        <div class="accordion">
+            <!-- Accordion content for categories -->
+            {% for category in categories %}
+                <div class="accordion-item">
+                    <button class="accordion-button">{{ category|capfirst }}
+                        <span class="material-symbols-outlined add-icon" data-category="{{ category }}">add</span>
+                    </button>
+                    <div class="accordion-content" id="{{ category }}">
+                        {% for entry in diary_entries %}
+                            {% if entry.category == category %}
+                                <div class="diary-entry" data-id="{{ entry.id }}">
+                                    <div class="entry-details">
+                                        <p><strong>Food:</strong> {{ entry.food_name }}</p>
+                                        <p><strong>Calories:</strong> {{ entry.calories }} kcal</p>
+                                        <p><strong>Protein:</strong> {{ entry.protein }} g</p>
+                                        <p><strong>Carbs:</strong> {{ entry.carbohydrates }} g</p>
+                                        <p><strong>Fat:</strong> {{ entry.fat }} g</p>
+                                        <p><strong>Date:</strong> {{ entry.date }}</p>
+                                    </div>
+                                    <div class="entry-actions">
+                                        <button class="edit-btn" data-id="{{ entry.id }}"><i class="fas fa-edit"></i></button>
+                                        <button class="delete-btn" data-id="{{ entry.id }}"><i class="fas fa-trash"></i></button>
+                                        <button class="save-btn" data-id="{{ entry.id }}"><i class="fas fa-star"></i></button> <!-- Save button -->
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+<div id="entry-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div class="tabs">
+            <button class="tablink active" onclick="openTab(event, 'CustomEntry')">Custom Entry</button>
+            <button class="tablink" onclick="openTab(event, 'ApiEntry')">API Entry</button>
+            <button class="tablink" onclick="openTab(event, 'SavedEntry')">Saved Entry</button> <!-- New tab -->
+        </div>
+        <div id="CustomEntry" class="tabcontent">
+            <form id="entry-form" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="entry_id" id="entry-id">
+                <input type="hidden" name="category" id="entry-category">
+                <input type="hidden" name="date" value="{{ selected_date }}">
+                <label for="food-name">Food Name:</label>
+                <input type="text" id="food-name" name="food_name" required>
+                <label for="calories">Calories:</label>
+                <input type="number" id="calories" name="calories" required>
+                <label for="protein">Protein (g):</label>
+                <input type="number" id="protein" name="protein" required>
+                <label for="carbohydrates">Carbohydrates (g):</label>
+                <input type="number" id="carbohydrates" name="carbohydrates" required>
+                <label for="fat">Fat (g):</label>
+                <input type="number" id="fat" name="fat" required>
+                <button type="submit">Save Entry</button>
+            </form>
+        </div>
+        <div id="ApiEntry" class="tabcontent" style="display: none;">
+            <form id="api-entry-form" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="category" id="api-entry-category">
+                <input type="hidden" name="date" value="{{ selected_date }}">
+                <label for="api-food-name">Food Name:</label>
+                <input type="text" id="api-food-name" name="food_name" required>
+                <button type="submit">Fetch Food Details</button>
+                <div id="suggestions"></div>
+            </form>
+        </div>
+        <div id="SavedEntry" class="tabcontent" style="display: none;"> <!-- New tab content -->
+            <div class="saved-entries">
+                {% for saved_entry in saved_entries %}
+                    <div class="entry">
+                        <p><strong>Food:</strong> {{ saved_entry.food_name }}</p>
+                        <p><strong>Calories:</strong> {{ saved_entry.calories }} kcal</p>
+                        <p><strong>Protein:</strong> {{ saved_entry.protein }} g</p>
+                        <p><strong>Carbs:</strong> {{ saved_entry.carbohydrates }} g</p>
+                        <p><strong>Fat:</strong> {{ saved_entry.fat }} g</p>
+                        <form method="post" action="{% url 'diary' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="food_name" value="{{ saved_entry.food_name }}">
+                            <input type="hidden" name="calories" value="{{ saved_entry.calories }}">
+                            <input type="hidden" name="protein" value="{{ saved_entry.protein }}">
+                            <input type="hidden" name="carbohydrates" value="{{ saved_entry.carbohydrates }}">
+                            <input type="hidden" name="fat" value="{{ saved_entry.fat }}">
+                            <input type="hidden" name="date" value="{{ selected_date }}">
+                            <label for="category-{{ saved_entry.id }}">Category:</label>
+                            <select name="category" id="category-{{ saved_entry.id }}">
+                                {% for category in categories %}
+                                    <option value="{{ category }}">{{ category|capfirst }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit">Add to Diary</button>
+                        </form>
+                        <button class="remove-saved-btn" data-id="{{ saved_entry.id }}"><i class="fas fa-trash"></i> Remove</button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablink");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+const entryModal = document.getElementById('entry-modal');
+const closeModal = document.querySelector('.modal .close');
+const entryForm = document.getElementById('entry-form');
+const apiEntryForm = document.getElementById('api-entry-form');
+const accordionButtons = document.querySelectorAll('.accordion-button');
+const addIcons = document.querySelectorAll('.add-icon');
+const editButtons = document.querySelectorAll('.edit-btn');
+const deleteButtons = document.querySelectorAll('.delete-btn');
+const saveButtons = document.querySelectorAll('.save-btn'); // Save buttons
+const removeSavedButtons = document.querySelectorAll('.remove-saved-btn'); // Remove saved buttons
+
+addIcons.forEach(icon => {
+    icon.addEventListener('click', (e) => {
+        const category = e.target.dataset.category;
+        document.getElementById('entry-category').value = category;
+        document.getElementById('api-entry-category').value = category;
+        entryModal.style.display = 'block';
+    });
+});
+closeModal.addEventListener('click', () => {
+    entryModal.style.display = 'none';
+    entryForm.reset();
+    apiEntryForm.reset();
+});
+accordionButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const content = button.nextElementSibling;
+        button.classList.toggle('active');
+        if (button.classList.contains('active')) {
+            content.style.maxHeight = content.scrollHeight + 'px';
+        } else {
+            content.style.maxHeight = '0';
+        }
+    });
+});
+editButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+        const entryId = e.target.closest('.edit-btn').dataset.id;
+        fetch(`/get_entry/${entryId}/`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('entry-id').value = entryId;
+            document.getElementById('food-name').value = data.food_name;
+            document.getElementById('calories').value = data.calories;
+            document.getElementById('protein').value = data.protein;
+            document.getElementById('carbohydrates').value = data.carbohydrates;
+            document.getElementById('fat').value = data.fat;
+            document.getElementById('entry-category').value = data.category;
+            entryModal.style.display = 'block';
+        });
+    });
+});
+deleteButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+        const entryId = e.target.closest('.delete-btn').dataset.id;
+        fetch(`/delete_entry/${entryId}/`, {
+            method: 'DELETE',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        }).then(response => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        });
+    });
+});
+saveButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+        const entryId = e.target.closest('.save-btn').dataset.id;
+        fetch(`/get_entry/${entryId}/`)
+        .then(response => response.json())
+        .then(data => {
+            fetch('/save_entry/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    food_name: data.food_name,
+                    calories: data.calories,
+                    protein: data.protein,
+                    carbohydrates: data.carbohydrates,
+                    fat: data.fat
+                })
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                }
+            });
+        });
+    });
+});
+removeSavedButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+        const entryId = e.target.closest('.remove-saved-btn').dataset.id;
+        fetch(`/delete_saved_entry/${entryId}/`, {
+            method: 'DELETE',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        }).then(response => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        });
+    });
+});
+window.addEventListener('click', (e) => {
+    if (e.target == entryModal) {
+        entryModal.style.display = 'none';
+        entryForm.reset();
+        apiEntryForm.reset();
+    }
+});
+apiEntryForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const foodName = document.getElementById('api-food-name').value;
+    const category = document.getElementById('api-entry-category').value;
+    fetch(`/fetch_food_details/?food_name=${foodName}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.status !== 'error') {
+            const formData = new FormData();
+            formData.append('food_name', data.food_name);
+            formData.append('calories', data.calories);
+            formData.append('protein', data.protein);
+            formData.append('carbohydrates', data.carbohydrates);
+            formData.append('fat', data.fat);
+            formData.append('category', category);
+            formData.append('date', document.querySelector('input[name="date"]').value);
+            fetch('/diary/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                }
+            });
+        } else {
+            alert(data.message);
+        }
+    });
+});
+const apiFoodNameInput = document.getElementById('api-food-name');
+const suggestionsContainer = document.getElementById('suggestions');
+apiFoodNameInput.addEventListener('input', () => {
+    const query = apiFoodNameInput.value;
+    fetch(`/diary_search_suggestions/?query=${query}`)
+    .then(response => response.json())
+    .then(data => {
+        suggestionsContainer.innerHTML = '';
+        data.forEach(item => {
+            const suggestionItem = document.createElement('div');
+            suggestionItem.className = 'suggestion-item';
+            suggestionItem.innerHTML = `
+                <img src="${item.image}" alt="${item.name}">
+                <p>${item.name}</p>
+            `;
+            suggestionItem.addEventListener('click', () => {
+                apiFoodNameInput.value = item.name;
+                suggestionsContainer.innerHTML = '';
+            });
+            suggestionsContainer.appendChild(suggestionItem);
+        });
+    });
+});
+// Chart Configuration
+const labels = ['Protein', 'Carbohydrates', 'Fat'];
+const data = {
+    labels: labels,
+    datasets: [{
+        label: 'Nutrient Breakdown',
+        data: [{{ total_protein }}, {{ total_carbohydrates }}, {{ total_fat }}],
+        backgroundColor: [
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(255, 159, 64, 0.2)',
+            'rgba(255, 205, 86, 0.2)',
+        ],
+        borderColor: [
+            'rgb(255, 99, 132)',
+            'rgb(255, 159, 64)',
+            'rgb(255, 205, 86)',
+        ],
+        borderWidth: 1
+    }]
+};
+const config = {
+    type: 'bar',
+    data: data,
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+};
+const myChart = new Chart(
+    document.getElementById('myChart'),
+    config
+);
+</script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+/* Root Variables */
+:root {
+    --color-primary: #6C9BCF;
+    --color-danger: #FF0060;
+    --color-success: #1B9C85;
+    --color-warning: #F7D060;
+    --color-white: #fff;
+    --color-info-dark: #7d8da1;
+    --color-dark: #363949;
+    --color-light: rgba(132, 139, 200, 0.18);
+    --color-dark-variant: #677483;
+    --color-background: #f6f6f9;
+
+    --card-border-radius: 2rem;
+    --border-radius-1: 0.4rem;
+    --border-radius-2: 1.2rem;
+
+    --card-padding: 1.8rem;
+    --padding-1: 1.2rem;
+
+    --box-shadow: 0 2rem 3rem var(--color-light);
+
+    --font-size-base: 0.88rem;
+    --font-size-small: 0.76rem;
+    --font-size-h1: 1.8rem;
+    --font-size-h2: 1.4rem;
+    --font-size-h3: 0.87rem;
+    --font-size-html: 14px;
+}
+
+/* Global Styles */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-dark);
+}
+
+.container {
+    width: 400px;
+    padding: 2rem;
+    background-color: var(--color-white);
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--box-shadow);
+    text-align: center;
+}
+
+h1 {
+    font-size: var(--font-size-h2);
+    color: var(--color-dark);
+    margin-bottom: 1rem;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--color-light);
+    border-radius: var(--border-radius-1);
+    font-size: var(--font-size-base);
+    font-family: 'Poppins', sans-serif;
+}
+
+button {
+    padding: 0.8rem;
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    border-radius: var(--border-radius-2);
+    font-size: var(--font-size-base);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: darken(var(--color-primary), 10%);
+}
+
+.error-message {
+    color: var(--color-danger);
+    margin-bottom: 1rem;
+    font-size: var(--font-size-small);
+}
+
+footer {
+    margin-top: 1.5rem;
+    font-size: var(--font-size-small);
+}
+
+footer a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}

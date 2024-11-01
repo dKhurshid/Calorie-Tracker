@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'style3.css' %}">
+    <title>Calorie Results</title>
+</head>
+<body>
+    <!-- Sidebar Section -->
+    <aside>
+        <div class="toggle">
+            <div class="logo">
+                <picture>
+                    <source srcset="{% static 'images/logo-small.png' %}" media="(max-width: 600px)">
+                    <source srcset="{% static 'images/logo-medium.png' %}" media="(max-width: 1200px)">
+                    <img src="{% static 'images/logo-large.png' %}" alt="Logo">
+                </picture>
+                <h2>Foodie<span class="danger"></span></h2>
+            </div>
+            <div class="close" id="close-btn">
+                <span class="material-symbols-outlined">close</span>
+            </div>
+        </div>
+        
+        <!-- Sidebar Content Section -->
+        <div class="sidebar">
+            <a href="{% url 'home' %}">
+                <span class="material-symbols-outlined">nutrition</span>
+                <h3>Check Calories Fast</h3>
+            </a>
+            <a href="{% url 'calorie_calculator' %}">
+                <span class="material-symbols-outlined">calculate</span>
+                <h3>Calorie Calculator</h3>
+            </a>
+            <a href="{% url 'diary' %}">
+                <span class="material-symbols-outlined">book</span>
+                <h3>Track Your Weight Loss</h3>
+            </a>
+            <a href="#">
+                <span class="material-symbols-outlined">settings</span>
+                <h3>Settings</h3>
+            </a>
+            <div class="logout">
+                <a href="#">
+                    <span class="material-symbols-outlined">logout</span>
+                    <h3>Logout</h3>
+                </a>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Main Content Section -->
+    <div class="container">
+        <div class="box">
+            <h1>Calorie Results</h1>
+            <div class="result">
+                <p>Maintenance Calories: {{ calculated_calories.maintain_weight }}</p>
+                <p>Mild Weight Loss 0.5 lb/week: {{ calculated_calories.mild_weight_loss }}</p>
+                <p>Weight Loss 1 lb/week: {{ calculated_calories.weight_loss }}</p>
+                <p>Extreme Weight Loss 2 lb/week: {{ calculated_calories.extreme_weight_loss }}</p>
+                <p>Mild Weight Gain 0.5 lb/week: {{ calculated_calories.mild_weight_gain }}</p>
+                <p>Weight Gain 1 lb/week: {{ calculated_calories.weight_gain }}</p>
+                <p>Extreme Weight Gain 2 lb/week: {{ calculated_calories.extreme_weight_gain }}</p>
+            </div>
+            <a href="{% url 'calorie_calculator' %}" class="back-button">Back to Calculator</a>
+            
+            <!-- Zigzag Diet Schedule 1 -->
+            <div class="zigzag-schedule">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Mild Weight Loss</th>
+                            <th>Weight Loss</th>
+                            <th>Extreme Weight Loss</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for schedule in zigzag_schedule_1 %}
+                        <tr>
+                            <td>{{ schedule.day }}</td>
+                            <td>{{ schedule.mild_weight_loss }} Calories</td>
+                            <td>{{ schedule.weight_loss }} Calories</td>
+                            <td>{{ schedule.extreme_weight_loss }} Calories</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>
